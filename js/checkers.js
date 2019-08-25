@@ -1,5 +1,14 @@
+/*
+Philip Jacobson
+Contact: philipljacobson@gmail.com
+ONE JUMP CHECKERS v1.1
+*/
+
+//CHECKER CLASS (game board, movement mechanics, etc)
 class Checkers{
+
 	
+	//CHECKERS constructor
 	constructor(defaultBoard = true, listOfSquares = null, squares = document.getElementsByClassName("black-square"),computerPlayer = true){
 		this.squares = squares;
 		this.selectOn = false;
@@ -31,6 +40,8 @@ class Checkers{
 		}
 	}
 
+	/*Simulate game between two computer-controlled AI agents
+	AI can either be randomized or controlled with Alpha-Beta Pruning*/
 	simulateGame(numGames = 1){
 		while(this.blackScore() > 0 && this.redScore() > 0){
 			var blackAI = new randomAI(this);
@@ -64,6 +75,7 @@ class Checkers{
 		return 0;
 	}
 
+	/*Initialize movement, AI mechanics, and turn changes*/
 	updateBoard(){
 		for (var i = 0; i < 32; i++){
 			this.squares[i].addEventListener("click", function(ch,n){
@@ -109,14 +121,18 @@ class Checkers{
 		}
 	}
 
+	/*Turn selected square on or off*/
 	updateSelect(s){
 		this.selectOn = s;
 	}	
 
+	/*Turn on or off computer-controlled AI*/
 	setPlayer(computerPlayer){
 		this.computerPlayer = computerPlayer;
 	}
 
+	/*Check to see if attempted move is within piece's moveset.
+	If so, return True, otherwise return False*/
 	checkMove(loc,piece,destination){
 		if(loc < 0 || loc > 31 || destination < 0 || destination > 31){
 			return false;
@@ -302,6 +318,9 @@ class Checkers{
 	
 	}
 
+	/*Check to see if a multi-jump (double, triple, etc) to
+	selected spot is possible. Returns true and sequence of jumps
+	if possible, otherwise returns false*/
 	multiJump(loc,piece,destination,seq = []){
 		console.log(loc,destination);
 		if(Math.abs(loc - destination) == 7 || Math.abs(loc - destination) == 9){
@@ -335,6 +354,8 @@ class Checkers{
 		return [false,seq];
 	}
 
+	/*Moves selected piece to selected destination. Removes pieces
+	from the board that have been jumped*/
 	move(loc,destination,piece){
 		if(Math.abs(destination-loc) > 5){
 			if(Math.abs(loc - destination) == 7 && loc % 8 > 3){
@@ -400,6 +421,7 @@ class Checkers{
 		}
 	}
 
+	/*Calculates 'score' for black side (weighted sum of pieces)*/
 	blackScore(){
 		var score = 0;
 		for (var i = 0; i < 32; i++){
@@ -416,6 +438,7 @@ class Checkers{
 		return score;
 	}
 
+	/*Calculates 'score' for red side (weighted sum of pieces)*/
 	redScore(){
 		var score = 0;
 		for (var i = 0; i < 32; i++){
@@ -431,6 +454,8 @@ class Checkers{
 		return score;
 	}
 
+	/*Calculates all possible moves for one side (black or red) based on current turn
+	Returns array of possible moves*/
 	calculateMoves(){
 		var mov = [3,-3,4,-4,5,-5,7,-7,9,-9];
 		var moves = [];
@@ -459,6 +484,8 @@ class Checkers{
 		return moves;
 	}
 
+	/*Calculates number of friendly neighbors for side color 
+	ie number of friendly pieces directly bordering each other*/
 	numberNeighbors(color){
 		var neighbors = 0;
 		for(var i = 0; i < 32; i++){
@@ -514,6 +541,8 @@ class Checkers{
 		return neighbors;
 	}
 
+	/*Calculates number of King pieces in the back row (row opposite of starting side
+	for that color)*/
 	kingsInBackRow(color){
 		var kings = 0;
 		if(color == 1){
@@ -532,6 +561,7 @@ class Checkers{
 		}
 	}
 
+	/*Removes all pieces from the board*/
 	clearBoard(){
 		for (var i = 0; i < 32; i++){
 			drawPiece(this.squares[i],0);
@@ -540,6 +570,7 @@ class Checkers{
 	}
 }
 
+/*Draws piece inside square element*/
 function drawPiece(element,piece){
 	if(element == null){}
 	else{
@@ -560,18 +591,21 @@ function drawPiece(element,piece){
 		}
 	}
 }
-
+/*SQUARE CLASS: Square at specified location containing piece*/
 class Square{
 	constructor(loc,piece){
 		this.loc = loc;
 		this.piece = piece;
 	}
 
+	/*Returns piece on square (returns 0 if unoccupied)*/
 	isOccupied(){
 		return this.piece;
 	}
 }
 
+/*ALPHA BETA AI CLASS: Computer-controlled AI agent implementing
+Alpha Beta Pruning game tree search*/
 class AlphabetaAI{
 	constructor(cutoff,e,color){
 		this.cutoff = cutoff;
@@ -579,6 +613,8 @@ class AlphabetaAI{
 		this.col = color;
 	}
 
+	/*Returns optimal move for the current turn. If fullOutput,
+	returns value of game state after move is executed*/
 	playTurn(blackTurn,currentBoard,depth,fullOutput = false){
 		if(fullOutput){
 			return this.alphabetaMinimax(blackTurn,currentBoard,depth);
@@ -588,6 +624,8 @@ class AlphabetaAI{
 		}
 	}
 
+	/*Eval function based on difference in score (difference in piece
+	value between two sides)*/
 	scoreEval(game,depth){
 		if(this.col == -1){
 			if(game.blackScore() == 0){
@@ -616,6 +654,8 @@ class AlphabetaAI{
 
 	}
 
+	/*Eval function based on score with additional weight given to 
+	spacial spread of pieces*/
 	spaceEval(game){
 		if(this.col == -1){
 			if(game.blackScore() == 0){
@@ -643,6 +683,7 @@ class AlphabetaAI{
 		}
 	}
 
+	/*Minimax function with Alpha Beta pruning implemented*/
 	alphabetaMinimax(blackTurn,currentBoard,depth,a = -1*Infinity,b = Infinity){
 		var squares = new Array(32);
 		var game = new Checkers(false,currentBoard,squares);
@@ -680,6 +721,7 @@ class AlphabetaAI{
 		return [val,best_act];
 	}
 
+	/*Maximin function with Alpha Beta pruning implemented*/ 
 	alphabetaMaximin(blackTurn,currentBoard,depth,a = -1*Infinity, b = Infinity){
 		var squares = new Array(32);
 		var game = new Checkers(false,currentBoard,squares);
@@ -718,11 +760,14 @@ class AlphabetaAI{
 	}
 }
 
+/*RANDOM AI CLASS: AI agent that makes random moves from possible
+movepool*/
 class randomAI{
 	constructor(game){
 		this.game = game;
 	}
 
+	/*Chooses random move from ones available*/
 	playTurn(){
 		var actions = this.game.calculateMoves();
 		var best_act = actions[Math.floor(actions.length*Math.random())]
@@ -730,26 +775,6 @@ class randomAI{
 	}
 }
 
-
-
-
-var listsquares = new Array(32);
-for (var i = 0; i < 32; i++){
-	listsquares[i] = new Square(i,0);
-}
-listsquares[3] = new Square(3,-1);
-listsquares[7] = new Square(7,-1);
-listsquares[10] = new Square(10,-1);
-listsquares[8] = new Square(8,-1);
-listsquares[14] = new Square(14,-1);
-listsquares[21] = new Square(21,-1);
-listsquares[22] = new Square(22,-1);
-listsquares[23] = new Square(23,1);
-listsquares[26] = new Square(26,-5);
-listsquares[29] = new Square(29,-5);
-
-
 document.getElementsByClassName("container")[0].style.width = window.innerHeight.toString() + "px";
 var ch = new Checkers(true,null,document.getElementsByClassName("black-square"),true);
 ch.updateBoard();
-//console.log(ch.simulateGame(1));
