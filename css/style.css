@@ -1,0 +1,29 @@
+.black-square {
+  float:left;
+  position: relative;
+  width: 12.5%;
+  padding-bottom : 12.5%; /* = width for a 1:1 aspect ratio */
+  margin:0%;
+  background-color:#654321;
+  overflow:hidden;
+}
+.white-square {
+  float:left;
+  position: relative;
+  width: 12.5%;
+  padding-bottom : 12.5%; /* = width for a 1:1 aspect ratio */
+  margin:0%;
+  background-color:#FFFFFF;
+  overflow:hidden;
+}
+.container{
+  z-index: -1;
+  position: relative;
+}
+img{
+  width:100%;
+  position: absolute;
+}
+
+
+
